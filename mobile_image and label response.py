@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 import base64
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit (adjust as needed)
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 16 MB limit (adjust as needed)
 UPLOAD_FOLDER = 'uploads'
 DETECTED_FOLDER = 'detected_faces'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
