@@ -17,8 +17,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['DETECTED_FOLDER'] = DETECTED_FOLDER
 
 # Load the pre-trained face detection model and encoder
-trained_model_path = "D:\\Computer Vision\\face_detection_model.joblib"
-trained_encoder_path = "D:\\Computer Vision\\face_encoder_labels.joblib"
+trained_model_path = "face_detection_model.joblib"
+trained_encoder_path = "face_encoder_labels.joblib"
 
 face_encodings = joblib.load(trained_model_path)
 labels = joblib.load(trained_encoder_path)
