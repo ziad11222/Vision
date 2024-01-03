@@ -6,9 +6,8 @@ import os
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from flask import jsonify
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit (adjust as needed)
 UPLOAD_FOLDER = 'uploads'
 DETECTED_FOLDER = 'detected_faces'
@@ -31,50 +30,14 @@ face_model.fit(face_encodings, labels)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def save_faces_from_image(image, face_locations, output_folder):
-    os.makedirs(output_folder, exist_ok=True)
-
-    for i, face_location in enumerate(face_locations):
-        top, right, bottom, left = face_location
-        face_image = Image.fromarray(image[top:bottom, left:right])
-        output_path = os.path.join(output_folder, f"face_{i + 1}.jpg")
-        face_image.save(output_path)
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/upload', methods=['POST'])
-def upload():
-    if 'file' not in request.files:
-        return render_template('index.html', error='No file part')
-
-    file = request.files['file']
-
-    if file.filename == '':
-        return render_template('index.html', error='No selected file')
-
-    if file and allowed_file(file.filename):
-        # Save the uploaded file with the full path
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        full_file_path = os.path.abspath(file_path)  # Get the absolute path
-        file.save(full_file_path)
-
-        # Call your face detection function with the full_file_path
-        detected_faces = detect_faces(full_file_path)
-
-        return render_template('index.html', success='File uploaded and faces detected successfully', detected_faces=detected_faces)
-
-    return render_template('index.html', error='Invalid file format')
-
-
-
 def detect_faces(image_path):
     # Load the test image
     test_image = face_recognition.load_image_file(image_path)
 
     # Find face locations in the image
     face_locations = face_recognition.face_locations(test_image)
+
+    detected_faces = []
 
     if len(face_locations) > 0:
         # Get face encodings
@@ -99,9 +62,52 @@ def detect_faces(image_path):
 
             # Use the prediction to label the detected face
             label = face_model.classes_[prediction.argmax()]
-            print(f"Detected face {i + 1} with label: {label}")
-# Rest of the code remains unchanged
+            detected_faces.append({
+                'label': label,
+                'face_number': i + 1,
+                'image_path': output_path,
+                'region_path': face_image_path
+            })
 
+    return detected_faces
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    if 'file' not in request.files:
+        return render_template('index.html', error='No file part')
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return render_template('index.html', error='No selected file')
+
+    if file and allowed_file(file.filename):
+        # Save the uploaded file with the full path
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        full_file_path = os.path.abspath(file_path)  # Get the absolute path
+        file.save(full_file_path)
+
+        # Call your face detection function with the full_file_path
+        detected_faces = detect_faces(full_file_path)
+
+        if detected_faces:
+            # Redirect to the result page and pass the detected faces
+            return redirect(url_for('result', detected_faces=detected_faces))
+        else:
+            return render_template('index.html', error='No faces detected in the uploaded image')
+
+    return render_template('index.html', error='Invalid file format')
+
+@app.route('/result')
+def result():
+    detected_faces = request.args.getlist('detected_faces')
+    detected_faces = [eval(face) for face in detected_faces]
+    print(detected_faces)
+    return render_template('result.html', detected_faces=detected_faces)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

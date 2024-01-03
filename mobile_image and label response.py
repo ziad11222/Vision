@@ -43,7 +43,9 @@ def detect_faces(image_path):
         pil_image = Image.fromarray(test_image)
         draw = ImageDraw.Draw(pil_image)
 
-        for face_location in face_locations:
+        # Prepare detected faces data
+        detected_faces = []
+        for i, face_location in enumerate(face_locations):
             top, right, bottom, left = face_location
             draw.rectangle([left, top, right, bottom], outline="red", width=2)
 
@@ -66,22 +68,24 @@ def detect_faces(image_path):
 
             draw.text(label_position, label, fill="red", font=font)
 
+            # Get the face image and save it
+            face_image = pil_image.crop((left, top, right, bottom))
+            face_image_path = os.path.join(app.config['DETECTED_FOLDER'], f"face_{i}_{label}.png")
+            face_image.save(face_image_path)
+
+            # Convert the face image to base64
+            with open(face_image_path, "rb") as face_image_file:
+                encoded_face_image = base64.b64encode(face_image_file.read()).decode("utf-8")
+
+            detected_faces.append({
+                "label": label,
+                "face_image_path": face_image_path,
+                "encoded_face_image": encoded_face_image
+            })
+
         # Save the image with squares and labels to the detected folder
         detected_image_path = os.path.join(app.config['DETECTED_FOLDER'], os.path.basename(image_path))
         pil_image.save(detected_image_path)
-
-        # Get face encodings for all faces
-        face_encodings = face_recognition.face_encodings(test_image, face_locations)
-
-        # Predict labels for each face using the machine learning model
-        predictions = face_model.predict_proba(face_encodings)
-
-        # Prepare detected faces data
-        detected_faces = []
-        for i, (face_location, prediction) in enumerate(zip(face_locations, predictions)):
-            top, right, bottom, left = face_location
-            label = face_model.classes_[prediction.argmax()]
-            detected_faces.append({"label": label, "top": top, "right": right, "bottom": bottom, "left": left})
 
         # Convert the image to base64
         with open(detected_image_path, "rb") as image_file:
@@ -90,7 +94,6 @@ def detect_faces(image_path):
         return detected_faces, detected_image_path, encoded_image
     else:
         return None, None, None
-
 
 @app.route('/upload', methods=['POST'])
 def upload():

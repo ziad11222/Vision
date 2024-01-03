@@ -1,0 +1,51 @@
+<!-- templates/result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Attendance Results</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .face-container {
+            max-width: 200px;
+            margin: 10px;
+            text-align: center;
+        }
+
+        .face-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .face-info {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    {% for detected_face in detected_faces %}
+        <div class="face-container">
+            <!-- Use url_for to generate the correct URL for the image -->
+            <img src="{{ url_for(filename=detected_face['image_path']) }}" alt="Detected Face">
+            <div class="face-info">
+                <p><strong>Label:</strong> {{ detected_face['label'] }}</p>
+                <!-- Use url_for for generating the correct URL for the region_path -->
+                
+            </div>
+        </div>
+    {% endfor %}
+</body>
+</html>
