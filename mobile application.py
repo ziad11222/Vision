@@ -6,6 +6,7 @@ import os
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+import base64
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit (adjust as needed)
@@ -63,9 +64,13 @@ def detect_faces(image_path):
             label = face_model.classes_[prediction.argmax()]
             detected_faces.append({"label": label, "top": top, "right": right, "bottom": bottom, "left": left})
 
-        return detected_faces, detected_image_path
+        # Convert the image to base64
+        with open(detected_image_path, "rb") as image_file:
+            encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
+
+        return detected_faces, detected_image_path, encoded_image
     else:
-        return None, None
+        return None, None, None
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -83,10 +88,15 @@ def upload():
         file.save(full_file_path)
 
         # Call face detection function with the full_file_path
-        detected_faces, detected_image_path = detect_faces(full_file_path)
+        detected_faces, detected_image_path, encoded_image = detect_faces(full_file_path)
 
         if detected_faces is not None:
-            return jsonify({"success": "File uploaded and faces detected successfully", "detected_faces": detected_faces, "detected_image_path": detected_image_path})
+            return jsonify({
+                "success": "File uploaded and faces detected successfully",
+                "detected_faces": detected_faces,
+                "detected_image_path": detected_image_path,
+                "encoded_image": encoded_image
+            })
         else:
             return jsonify({"error": "No faces detected in the uploaded image"})
 
