@@ -19,32 +19,11 @@
         {% endif %}
 
         <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" accept="image/*" id="fileInput" required>
+            <input type="file" name="file" accept="image/*" required>
             <br>
             <br>
             <button type="submit">Upload</button>
-            <button type="button" id="cameraButton" onclick="openCamera()">Open Camera</button>
         </form>
     </div>
-
-    <script>
-        function openCamera() {
-            // Access the user's camera
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then((stream) => {
-                    // Get the video element by its ID
-                    const videoElement = document.getElementById('fileInput');
-                    
-                    // Attach the camera stream to the video element
-                    videoElement.srcObject = stream;
-
-                    // Play the video
-                    videoElement.play();
-                })
-                .catch((error) => {
-                    console.error('Error accessing camera:', error);
-                });
-        }
-    </script>
 </body>
 </html>

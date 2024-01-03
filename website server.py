@@ -16,6 +16,8 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['DETECTED_FOLDER'] = DETECTED_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit (adjust as needed)
+
 
 # Load the pre-trained face detection model and encoder
 trained_model_path = "D:\\Computer Vision\\face_detection_model.joblib"
