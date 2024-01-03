@@ -31,29 +31,32 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def detect_faces(image_path):
-    # Load the test image
-    test_image = face_recognition.load_image_file(image_path)
+    try:
+        # Load the test image
+        test_image = face_recognition.load_image_file(image_path)
 
-    # Find face locations in the image
-    face_locations = face_recognition.face_locations(test_image)
+        # Find face locations in the image
+        face_locations = face_recognition.face_locations(test_image)
 
-    if len(face_locations) > 0:
-        # Get face encodings
-        face_encodings = face_recognition.face_encodings(test_image, face_locations)
+        if len(face_locations) > 0:
+            # Get face encodings
+            face_encodings = face_recognition.face_encodings(test_image, face_locations)
 
-        # Predict labels for each face using the machine learning model
-        predictions = face_model.predict_proba(face_encodings)
+            # Predict labels for each face using the machine learning model
+            predictions = face_model.predict_proba(face_encodings)
 
-        # Prepare detected faces data
-        detected_faces = []
-        for i, (face_location, prediction) in enumerate(zip(face_locations, predictions)):
-            top, right, bottom, left = face_location
-            label = face_model.classes_[prediction.argmax()]
-            detected_faces.append({"label": label, "top": top, "right": right, "bottom": bottom, "left": left})
+            # Prepare detected faces data
+            detected_faces = []
+            for i, (face_location, prediction) in enumerate(zip(face_locations, predictions)):
+                top, right, bottom, left = face_location
+                label = face_model.classes_[prediction.argmax()]
+                detected_faces.append({"label": label, "top": top, "right": right, "bottom": bottom, "left": left})
 
-        return detected_faces
-    else:
-        return None
+            return detected_faces
+        else:
+            return None
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.route('/upload', methods=['POST'])
 def upload():
