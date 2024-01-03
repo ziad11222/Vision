@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from PIL import Image
+from PIL import Image, ImageDraw
 import face_recognition
 import joblib
 import os
@@ -31,32 +31,41 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def detect_faces(image_path):
-    try:
-        # Load the test image
-        test_image = face_recognition.load_image_file(image_path)
+    # Load the test image
+    test_image = face_recognition.load_image_file(image_path)
 
-        # Find face locations in the image
-        face_locations = face_recognition.face_locations(test_image)
+    # Find face locations in the image
+    face_locations = face_recognition.face_locations(test_image)
 
-        if len(face_locations) > 0:
-            # Get face encodings
-            face_encodings = face_recognition.face_encodings(test_image, face_locations)
+    if len(face_locations) > 0:
+        # Draw squares around the detected faces
+        pil_image = Image.fromarray(test_image)
+        draw = ImageDraw.Draw(pil_image)
 
-            # Predict labels for each face using the machine learning model
-            predictions = face_model.predict_proba(face_encodings)
+        for face_location in face_locations:
+            top, right, bottom, left = face_location
+            draw.rectangle([left, top, right, bottom], outline="red", width=2)
 
-            # Prepare detected faces data
-            detected_faces = []
-            for i, (face_location, prediction) in enumerate(zip(face_locations, predictions)):
-                top, right, bottom, left = face_location
-                label = face_model.classes_[prediction.argmax()]
-                detected_faces.append({"label": label, "top": top, "right": right, "bottom": bottom, "left": left})
+        # Save the image with squares to the detected folder
+        detected_image_path = os.path.join(app.config['DETECTED_FOLDER'], os.path.basename(image_path))
+        pil_image.save(detected_image_path)
 
-            return detected_faces
-        else:
-            return None
-    except Exception as e:
-        return {"error": str(e)}
+        # Get face encodings
+        face_encodings = face_recognition.face_encodings(test_image, face_locations)
+
+        # Predict labels for each face using the machine learning model
+        predictions = face_model.predict_proba(face_encodings)
+
+        # Prepare detected faces data
+        detected_faces = []
+        for i, (face_location, prediction) in enumerate(zip(face_locations, predictions)):
+            top, right, bottom, left = face_location
+            label = face_model.classes_[prediction.argmax()]
+            detected_faces.append({"label": label, "top": top, "right": right, "bottom": bottom, "left": left})
+
+        return detected_faces, detected_image_path
+    else:
+        return None, None
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -74,9 +83,12 @@ def upload():
         file.save(full_file_path)
 
         # Call face detection function with the full_file_path
-        detected_faces = detect_faces(full_file_path)
+        detected_faces, detected_image_path = detect_faces(full_file_path)
 
-        return jsonify({"success": "File uploaded and faces detected successfully", "detected_faces": detected_faces})
+        if detected_faces is not None:
+            return jsonify({"success": "File uploaded and faces detected successfully", "detected_faces": detected_faces, "detected_image_path": detected_image_path})
+        else:
+            return jsonify({"error": "No faces detected in the uploaded image"})
 
     return jsonify({"error": "Invalid file format"})
 
