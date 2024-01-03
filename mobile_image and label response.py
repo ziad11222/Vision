@@ -54,13 +54,17 @@ def detect_faces(image_path):
             prediction = face_model.predict_proba([face_encoding])
             label = face_model.classes_[prediction.argmax()]
 
-            # Add label above the face square
             # Add label above the face square with reduced font size
             label_position = (left + (right - left) // 2, top - 20)
             font_size = 18  # You can adjust this value as needed
-            font = ImageFont.truetype("arial.ttf", font_size)
-            draw.text(label_position, label, fill="red", font=font)
 
+            try:
+                font = ImageFont.truetype("arial.ttf", font_size)
+            except IOError:
+                # Fallback to default font if "arial.ttf" is not available
+                font = ImageFont.load_default()
+
+            draw.text(label_position, label, fill="red", font=font)
 
         # Save the image with squares and labels to the detected folder
         detected_image_path = os.path.join(app.config['DETECTED_FOLDER'], os.path.basename(image_path))
