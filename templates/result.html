@@ -38,14 +38,13 @@
 <body>
     {% for detected_face in detected_faces %}
         <div class="face-container">
-            <!-- Use url_for to generate the correct URL for the image -->
-            <img src="{{ url_for(filename=detected_face['image_path']) }}" alt="Detected Face">
+            <img src="{{ url_for('static', filename=detected_faces['image_path']) }}" alt="Detected Face">
             <div class="face-info">
                 <p><strong>Label:</strong> {{ detected_face['label'] }}</p>
-                <!-- Use url_for for generating the correct URL for the region_path -->
-                
+                <p><a href="{{ url_for('result', region_path=detected_faces['region_path']) }}">View Region</a></p>
             </div>
         </div>
     {% endfor %}
 </body>
 </html>
+

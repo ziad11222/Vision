@@ -7,8 +7,8 @@ from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-app = Flask(__name__, static_url_path='/static')
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit (adjust as needed)
+app = Flask(__name__, static_url_path='/static', static_folder='detected_faces')
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 16 MB limit (adjust as needed)
 UPLOAD_FOLDER = 'uploads'
 DETECTED_FOLDER = 'detected_faces'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -106,7 +106,6 @@ def upload():
 def result():
     detected_faces = request.args.getlist('detected_faces')
     detected_faces = [eval(face) for face in detected_faces]
-    print(detected_faces)
     return render_template('result.html', detected_faces=detected_faces)
 
 if __name__ == '__main__':
