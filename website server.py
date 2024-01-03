@@ -9,15 +9,13 @@ from sklearn.preprocessing import StandardScaler
 from flask import jsonify
 
 app = Flask(__name__)
-
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit (adjust as needed)
 UPLOAD_FOLDER = 'uploads'
 DETECTED_FOLDER = 'detected_faces'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['DETECTED_FOLDER'] = DETECTED_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit (adjust as needed)
-
 
 # Load the pre-trained face detection model and encoder
 trained_model_path = "D:\\Computer Vision\\face_detection_model.joblib"
