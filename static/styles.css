@@ -6,7 +6,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    /* height: 100vh; */
 }
 
 .container {
@@ -40,7 +40,20 @@ h1 {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
-
+ul,li{
+    list-style-type: none;
+}
+ul{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+li{
+    flex-basis: 28%;
+    max-width: 200px;
+}
 .face-image {
     width: 100%;
     border-radius: 4px;
@@ -69,4 +82,9 @@ h1 {
 
 .view-region:hover {
     background-color: #2980b9;
+}
+
+
+.predicted_small_image{
+    max-width: 50px;
 }
