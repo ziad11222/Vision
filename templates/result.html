@@ -1,50 +1,43 @@
-<!-- templates/result.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Attendance Results</title>
+    <title>Face Attendance App - Result</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .face-container {
-            max-width: 200px;
-            margin: 10px;
-            text-align: center;
-        }
-
-        .face-container img {
-            max-width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .face-info {
-            margin-top: 10px;
-            font-size: 14px;
-        }
-    </style>
 </head>
-<body>
-    {% for detected_face in detected_faces %}
-        <div class="face-container">
-            <img src="{{ url_for('static', filename=detected_faces['image_path']) }}" alt="Detected Face">
-            <div class="face-info">
-                <p><strong>Label:</strong> {{ detected_face['label'] }}</p>
-                <p><a href="{{ url_for('result', region_path=detected_faces['region_path']) }}">View Region</a></p>
-            </div>
-        </div>
-    {% endfor %}
-</body>
-</html>
 
+<body>
+    <div class="container">
+        <h1>Face Attendance App - Result</h1>
+
+        {% if success %}
+            <p class="success">{{ success }}</p>
+
+            {% if detected_faces %}
+                <h2>Detected Faces:</h2>
+                <ul>
+                    {% for face in detected_faces %}
+                        <li>
+                            <p><strong>Face Image:</strong></p>
+                            <img  class="predicted_small_image" src="data:image/png;base64,{{ face.encoded_face_image }}" alt="Detected Face">
+                            <p><strong>Name:</strong> {{ face.label.replace("_","\nID:") }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+    
+
+                <p><strong>Input Image:</strong></p>
+                <img src="data:image/jpeg;base64,{{ encoded_image }}" alt="Detected Image" style="width: 100%;">
+            {% else %}
+                <p>No faces detected in the uploaded image.</p>
+            {% endif %}
+        {% elif error %}
+            <p class="error"><strong>Error:</strong> {{ error }}</p>
+        {% endif %}
+    </div>
+</body>
+
+</html>
