@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Face Attendance App</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,7 +20,7 @@
         }
 
         .container {
-            max-width: 400px;
+            max-width: 800px; /* Adjusted maximum width for better readability */
             width: 100%;
             padding: 30px;
             background-color: #fff;
@@ -70,14 +72,20 @@
             background-color: #218838;
         }
 
+        .error,
+        .success {
+            margin-top: 20px;
+            padding: 10px; /* Added padding for better visibility */
+        }
+
         .error {
             color: #dc3545;
-            margin-top: 20px;
+            background-color: #f8d7da; /* Added background color for error messages */
         }
 
         .success {
             color: #28a745;
-            margin-top: 20px;
+            background-color: #d4edda; /* Added background color for success messages */
         }
 
         .file-name {
@@ -90,8 +98,23 @@
             margin-top: 20px;
             display: none;
         }
+
+        /* Add style for detected faces */
+        .detected-face {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap; /* Added flex-wrap to handle smaller screens */
+            justify-content: center;
+        }
+
+        .detected-face img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Face Attendance App</h1>
@@ -103,11 +126,18 @@
             <button type="submit">Upload & Detect Faces</button>
         </form>
 
-        <div class="loading" id="loadingMessage">Detecting faces... <img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading"></div>
-        <div class="success" id="successMessage" style="display: none;">Face detection completed. Attendance assigned successfully.</div>
+        <div class="loading" id="loadingMessage">Detecting faces... <img
+                src="{{ url_for('static', filename='loading.gif') }}" alt="Loading"></div>
+        <div class="success" id="successMessage" style="display: none;">Face detection completed. Attendance assigned
+            successfully.</div>
+
+        <!-- Placeholder for detected faces -->
+        <div id="detectedFacesContainer" class="detected-face">
+            <!-- Detected faces will be displayed here -->
+        </div>
 
         {% if error %}
-            <p class="error">{{ error }}</p>
+        <p class="error">{{ error }}</p>
         {% endif %}
     </div>
 
@@ -121,15 +151,55 @@
         function showLoadingMessage() {
             const loadingMessage = document.getElementById('loadingMessage');
             const successMessage = document.getElementById('successMessage');
+            const detectedFacesContainer = document.getElementById('detectedFacesContainer');
+            const fileInput = document.getElementById('fileInput');
 
             loadingMessage.style.display = 'block';
+
+            // Check if a file is selected
+            if (fileInput.files.length > 0) {
+                // Create an Image element for the uploaded image
+                const uploadedImage = new Image();
+                uploadedImage.src = URL.createObjectURL(fileInput.files[0]);
+                uploadedImage.alt = 'Uploaded Image';
+
+                // Append the Image element to the detectedFacesContainer
+                detectedFacesContainer.appendChild(uploadedImage);
+            }
 
             // Simulate a delay (you can remove this setTimeout in your actual implementation)
             setTimeout(() => {
                 loadingMessage.style.display = 'none';
                 successMessage.style.display = 'block';
+
+                // Clear the content of detectedFacesContainer
+                detectedFacesContainer.innerHTML = '';
+
+                // Get the detected faces data from the server (replace with actual logic)
+                const detected_faces_data = {
+                    "success": "File uploaded and faces detected successfully",
+                    "detected_faces": [
+                    
+                    ],
+                    "detected_image_path": "path_to_detected_image",
+                    "Input Image": "base64_encoded_image"
+                };
+
+                // Display the detected faces
+                if (detected_faces_data.detected_faces) {
+                    detected_faces_data.detected_faces.forEach(face => {
+                        const faceImage = new Image();
+                        faceImage.src = face.path;
+                        faceImage.alt = face.alt;
+
+                        detectedFacesContainer.appendChild(faceImage);
+                    });
+                }
+
+                // Optionally, you can handle the detected_image_path and encoded_image as needed
             }, 2000); // Simulating a 2-second delay
         }
     </script>
 </body>
+
 </html>
